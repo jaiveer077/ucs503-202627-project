@@ -7,11 +7,16 @@ build-backend = "hatchling.build"
 name = "tiet-ucs503.github.io/ucs503p-202627odd-template"
 version = "0.0.1"
 authors = [
-  { name="Raghav B. Venkataramaiyer", email="bv.raghav@thapar.edu" },
+  { name="Jaiveer Singh", email="jsingh_be24@thapar.edu" },
+  { name="Harshjyot Kaur", email="hkaur4_be24@thapar.edu" },
+  { name="Avneet Kaur", email="akaur5_be24@thapar.edu" },
+  { name="Archita Sharma", email="asharma20_be24@thapar.edu" }
 ]
 # maintainers = [
-#   { name="Raghav B. Venkataramaiyer",
-#     email="bvraghav@gmail.com" },
+#   { name="Jaiveer Singh", email="jsingh_be24@thapar.edu" },
+  { name="Harshjyot Kaur", email="hkaur4_be24@thapar.edu" },
+  { name="Avneet Kaur", email="akaur5_be24@thapar.edu" },
+  { name="Archita Sharma", email="asharma20_be24@thapar.edu" }
 # ]
 description = "UCS503 : Software Engineering : Project Sample"
 readme = "README.md"

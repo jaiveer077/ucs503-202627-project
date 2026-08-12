@@ -1,29 +1,28 @@
-﻿![Tiet Logo](assets/tiet-logo.svg){ .tiet-logo }
+﻿![TIET Logo](assets/tiet-logo.svg){ .tiet-logo }
 
-**UCS503: Software Engineering (Project)**  
+**UCS503: Software Engineering (Project)**
 **TIET Patiala**
 
 # The Sum Function in C++
 
-**Author(s)**:
+**Author(s):**
 
-`(RGB)` Raghav B. Venkataramaiyer `<bv.raghav -at-
-thapar -dot- edu>`
+* `Jaiveer Singh` `<jsingh_be24@thapar.edu>`
+* `Harshjyot Kaur` `<hkaur4_be24@thapar.edu>`
+* `Avneet Kaur` `<akaur5_be24@thapar.edu>`
+* `Archita Sharma` `<asharma20_be24@thapar.edu>`
 
-This project creates a sum function in c++ as a sample
-to illustrate how to compile a shared library and
-distribute it for use along with the binary.
+This project creates a sum function in C++ as a sample to illustrate how to compile a shared library and distribute it for use along with the binary.
 
 ## Installation
 
-``` shell
+```shell
 make -C code
 ```
 
-This will create create a folder `dist` in `code`
-folder, with following contents
+This will create a folder `dist` in the `code` folder, with the following contents:
 
-```
+```text
 dist
  +-lib
  |  \-libbvr_math.so
@@ -33,7 +32,7 @@ dist
 
 ## Usage
 
-``` shell
+```shell
 cd code
 export LD_LIBRARY_PATH=dist/lib
 ./dist/bin/run
