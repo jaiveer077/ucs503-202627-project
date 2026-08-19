@@ -13,8 +13,7 @@
 \makeatletter \newcommand{\BvrSetLabInstructor}[1]{%
   \gdef\Bvr@LabInstructor{#1}}
 % default
-\newcommand{\Bvr@LabInstructor}{Dr. Raghav %
-  B. Venkataramaiyer}
+\newcommand{\Bvr@LabInstructor}{Nisha Thakur}
 % public accessor
 \newcommand{\BvrLabInstructorValue}{\Bvr@LabInstructor}
 \makeatother
@@ -38,24 +37,24 @@
 
 % -----------------------------------------------------
 
-\title{Grievance-Resolution System for a Tier-2/3 City}
+\title{Smart Photo Drive}
 
-\BvrSetLabInstructor{Dr. Raghav B. Venkataramaiyer}
+\BvrSetLabInstructor{Ms. Nisha Thakur}
 
 \BvrSubtitle{%
-  Project Proposal for UCS503P  \\
+  Project Proposal for UCS503 -- Software Engineering  \\
   Submitted to: \BvrLabInstructorValue \\ \bfseries
-  Thapar Institute of Engineering and Technology% 
+  Thapar Institute of Engineering and Technology%
 }
 
 \author{
-  Vidya Vaidyanathan, CSED%
-  \thanks{Roll No: \texttt{1024030xxx}, %
-    Email: \texttt{vvaidhanathan\_be24\@thapar.edu}}
-  \and 
-  Bhanurekha Ganesan, CSED%
-  \thanks{Roll No: \texttt{1024030xxx}, %
-    Email: \texttt{bganesan\_be24\@thapar.edu}}
+  Harshjyot Kaur -- 1024031176
+  \and
+  Jaiveer Singh -- 1024030976
+  \and
+  Archita Sharma -- 1024030715
+  \and
+  Avneet Kaur -- 1024031173
 }
 
 \date{\today}
@@ -65,178 +64,495 @@
 
 \section{Higher-order goal%
   \BvrHint{\ldots secondary framing}}
-This project aims to improve sustainable urban
-governance by reducing the time and effort required to
-resolve citizen issues. While the topic is broader than
-any single municipality, the immediate engineering
-objective is to translate \emph{efficient public
-  service delivery} into a measurable, deployable
-software solution.
+
+This project aims to improve the way photographs captured during large
+events are searched, organized, and accessed by individuals. Event
+photographers commonly capture thousands of photographs, making it
+difficult for a participant to manually locate all photographs in which
+they appear. The higher-order goal of Smart Photo Drive is to transform
+this time-consuming manual search into an automated and user-friendly
+photo retrieval process.
+
+The immediate engineering objective is to develop a deployable web-based
+system that uses artificial intelligence for face-based photo retrieval.
+A user should be able to provide a reference photograph containing their
+face, after which the system searches the event photograph collection
+and presents the photographs that are likely to contain the same person.
 
 \section{Time-to-value %
-\BvrHint{\ldots primary heuristic}}
+  \BvrHint{\ldots primary heuristic}}
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item We will deliver meaningful increments quickly by prototyping the core user workflow and validating it with users within a short iteration window.
-    \item We will prioritize fast feedback over perfection by using weekly iterations (and targeting CI-backed automation early) to reduce release friction.
-    \item Success is defined by what can be delivered and measured in the first iteration, then improved based on user feedback.
+    \item We will first implement the core photo retrieval workflow:
+    event photo upload, reference face input, face processing, matching,
+    and display of retrieved photographs.
+
+    \item The project will be developed incrementally so that a working
+    prototype can be demonstrated early, followed by improvements in
+    matching quality, usability, performance, and deployment.
+
+    \item We will prioritize a functional end-to-end system over
+    unnecessary complexity, allowing the team to validate the core idea
+    before adding advanced features.
+
+    \item Success in the initial iteration is defined by the system's
+    ability to process an event photo collection and retrieve relevant
+    photographs for a given user.
 \end{itemize}
 
 \section{Problem Statement}
-Citizens in a tier-2/3 Indian city face delays and uncertainty when reporting local issues (e.g., streetlight outages, water leakage, garbage accumulation, road potholes). Common pain points include:
+
+Event photographers may capture hundreds or thousands of photographs
+during college events, weddings, conferences, festivals, sports events,
+and other large gatherings. After the event, participants often need to
+manually browse through large collections of photographs to find the
+images in which they appear.
+
+Common pain points include:
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Fragmentation:} complaints are often made via multiple channels (calls, social media, paper forms), causing lost context.
-    \item \textbf{Low transparency:} citizens cannot easily see the status of their complaint (e.g., ``received'', ``assigned'', ``in progress'', ``resolved'').
-    \item \textbf{Slow coordination:} departments/field teams lack a unified, trackable workflow with clear ownership.
-    \item \textbf{Poor data quality:} duplicate or incomplete reports force rework and extend resolution time.
+    \item \textbf{Manual searching:} Users may have to browse through
+    hundreds or thousands of photographs individually to locate their
+    pictures.
+
+    \item \textbf{Time consumption:} Searching large event collections
+    manually can require significant time, especially when the user
+    appears in many photographs.
+
+    \item \textbf{Poor discoverability:} Conventional photo folders
+    generally organize images by filename, timestamp, or directory
+    rather than by the people appearing in the photographs.
+
+    \item \textbf{Large-scale collections:} As the number of photographs
+    increases, manually searching the collection becomes increasingly
+    inconvenient.
+
+    \item \textbf{Repeated effort:} Multiple users searching for their
+    own photographs may repeatedly perform the same manual browsing
+    process.
 \end{itemize}
 
-\textbf{Why this matters now (contextual relevance):} In an urban setting with limited staff bandwidth, even small process improvements can noticeably reduce resolution delays and repeated submissions.
+\textbf{Why this matters now (contextual relevance):} Modern events
+generate increasingly large digital photo collections. An automated
+face-based retrieval system can reduce the effort required to locate
+personal photographs while providing photographers or event organizers
+with a more efficient way to distribute photographs.
 
 \section{Proposed Solution %
 \BvrHint{\ldots Software Proposition}}
+
 \subsection{Overview}
-Build a \textbf{web-based} ``Grievance-to-Resolution'' system with the following components:
+
+Build a \textbf{web-based AI-powered photo retrieval system} that allows
+event photographers or administrators to upload a collection of event
+photographs and allows users to retrieve photographs containing their
+face.
+
+The proposed system will contain the following components:
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Citizen submission portal:} users submit an issue with photo (optional), category, and locality/ward.
-    \item \textbf{Automated triage:} basic duplicate detection and completeness checks.
-    \item \textbf{Department workflow:} assign issues to relevant department/team and update statuses.
-    \item \textbf{Status transparency:} citizens track status and receive notifications when resolved.
-    \item \textbf{Admin/ops dashboard:} performance summaries (resolution time, backlog).
+    \item \textbf{Event photo management:} an administrator or
+    photographer uploads a large collection of photographs associated
+    with an event.
+
+    \item \textbf{Reference photo input:} a user provides a photograph
+    containing their face to serve as the reference for the search.
+
+    \item \textbf{Face detection and processing:} the system identifies
+    faces in the reference image and event photographs using an
+    appropriate computer vision model.
+
+    \item \textbf{Face matching:} facial representations are compared
+    to identify photographs that are likely to contain the same person.
+
+    \item \textbf{Photo retrieval:} matching photographs are collected
+    and presented to the user through the web interface.
+
+    \item \textbf{Photo access:} users can view their matched
+    photographs and download or access them as permitted by the
+    application.
 \end{itemize}
 
+The project will evaluate suitable AI-based face detection and
+recognition techniques during implementation. YOLO-based face detection
+may be considered as one candidate approach, while the final model and
+matching method will be selected based on accuracy, processing time,
+availability of suitable models, and deployment feasibility.
+
 \subsection{Core workflow}
+
 \begin{enumerate}[leftmargin=0.7cm]
-    \item Citizen creates a complaint and receives a complaint ID immediately.
-    \item System validates completeness and suggests possible duplicates (lightweight similarity on text/category and approximate location).
-    \item Department staff update status (Received $\rightarrow$ Assigned $\rightarrow$ In Progress $\rightarrow$ Resolved).
-    \item Citizen views status updates and resolution notes.
+    \item The photographer or administrator uploads the photographs
+    captured during an event.
+
+    \item The system processes the uploaded photographs and detects
+    faces present in the images.
+
+    \item A user opens the web application and provides a reference
+    photograph containing their face.
+
+    \item The system processes the reference face and compares it with
+    the facial information extracted from the event photographs.
+
+    \item Photographs with sufficiently similar facial representations
+    are identified as candidate matches.
+
+    \item The system displays the retrieved photographs to the user,
+    who can view and download the relevant images.
 \end{enumerate}
 
-\subsection{Operational constraints for an educational, tier-2/3 setting}
+\subsection{Operational constraints for an educational deployment}
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Keep the solution usable on low-to-mid range devices via responsive web design.
-    \item Avoid dependence on advanced research algorithms; focus on workflow, automation, and system correctness.
-    \item Design for deployability using common web hosting and managed databases.
+    \item The system should provide a responsive web interface that can
+    be accessed from commonly available computers and mobile devices.
+
+    \item The solution should use established computer vision and web
+    development technologies instead of requiring the development of a
+    novel face-recognition algorithm.
+
+    \item The initial implementation should be designed for a realistic
+    educational project scale while remaining extensible to larger
+    event photo collections.
+
+    \item User photographs and event photographs should be handled with
+    appropriate access controls and privacy considerations.
 \end{itemize}
 
 \section{Solution Approach %
-\BvrHint{\ldots Engineering focus}}
-This is an engineering course project, so we focus on scalable administrative and workflow aspects rather than novel algorithm research.
+  \BvrHint{\ldots Engineering focus}}
 
-\subsection{Duplicate/quality assistance %
-\BvrHint{\ldots non-research}}
-Duplicate detection will be heuristic-based:
+This is an engineering course project, so the primary focus will be on
+developing a complete, reliable, and deployable software system rather
+than proposing a new face-recognition research algorithm.
+
+The proposed implementation will use a modern web architecture
+consisting of a ReactJS frontend, a Python-based FastAPI backend, and
+MongoDB for application data. The AI processing component will be
+integrated with the backend and will use an appropriate face detection
+and recognition pipeline selected during development.
+
+\subsection{Face detection and recognition %
+  \BvrHint{\ldots AI component}}
+
+The AI component will perform two major tasks:
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Normalize text (category + short description keywords).
-    \item Use a simple similarity measure (e.g., token overlap / TF-IDF cosine with threshold) without claiming state-of-the-art.
-    \item Show top candidate duplicates to staff for decision; never fully auto-delete or auto-reject.
+    \item \textbf{Face detection:} identify the location of faces within
+    the reference image and event photographs.
+
+    \item \textbf{Face matching:} generate or obtain suitable facial
+    representations and compare the reference face with faces found in
+    the event photographs.
 \end{itemize}
+
+The team will evaluate practical face detection and recognition
+approaches based on accuracy, computational requirements, inference
+speed, and ease of integration with the web application. YOLO-based
+models may be evaluated for the face detection component, while a
+suitable face embedding or recognition method may be used for matching.
+
+The system will use a similarity threshold to determine candidate
+matches. The threshold will be tuned using test photographs to balance
+the number of correctly retrieved photographs against incorrect
+matches.
 
 \subsection{Web architecture %
-\BvrHint{\ldots web-based solution}}
-A typical 3-tier web architecture:
+  \BvrHint{\ldots web-based solution}}
+
+A typical three-tier architecture will be used:
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Frontend:} responsive UI for citizens and staff (status pages, submission form, dashboard).
-    \item \textbf{Backend API:} authentication, complaint submission, status transitions, assignment logic.
-    \item \textbf{Database:} store users, complaints, status history, attachments metadata.
+    \item \textbf{Frontend:} ReactJS will provide the user interface for
+    event management, reference photo upload, search initiation, and
+    display of retrieved photographs.
+
+    \item \textbf{Backend API:} FastAPI will provide APIs for image
+    upload, processing requests, face-matching operations, retrieval of
+    results, and application logic.
+
+    \item \textbf{Database:} MongoDB will store application metadata
+    such as users, events, uploaded photo information, processing
+    status, and references required for retrieving photographs.
 \end{itemize}
 
-\subsection{CI/CD and fast delivery enabler}
-CI/CD will be used to:
-\begin{itemize}[leftmargin=0.7cm]
-    \item Automatically build and run tests on every change.
-    \item Produce repeatable deployment artifacts to staging.
-    \item Enable safe and frequent releases of incremental features.
-\end{itemize}
+The actual image files may be stored using suitable file or object
+storage, while the database will maintain the corresponding metadata
+and references.
+
+\subsection{AI processing pipeline}
+
+The proposed processing pipeline is:
+
+\begin{enumerate}[leftmargin=0.7cm]
+    \item Upload the event photographs.
+    \item Validate and preprocess the images.
+    \item Detect faces in the event photographs.
+    \item Generate facial representations for detected faces.
+    \item Store the required processing information for later matching.
+    \item Accept a user's reference photograph.
+    \item Detect and represent the user's face.
+    \item Compare the reference representation against stored
+    representations.
+    \item Retrieve photographs containing sufficiently similar faces.
+\end{enumerate}
+
+This approach avoids repeatedly performing the complete image-processing
+pipeline whenever a new user searches the same event collection.
+
+\subsection{Development and deployment approach}
+
+The project will be developed incrementally using version control and
+regular testing. The team will maintain the project source code in a
+GitHub repository and use separate development tasks for frontend,
+backend, database, AI processing, testing, and deployment.
+
+Where practical, automated build and testing steps will be introduced
+during development. The final system will be deployed to a suitable
+web-accessible environment so that the complete photo retrieval
+workflow can be demonstrated.
 
 \section{Evaluation Criterion %
-\BvrHint{\ldots measurable and attributable}}
-We define success using measurable metrics tied to the core workflow.
+  \BvrHint{\ldots measurable and attributable}}
+
+The project will evaluate the system using measurable criteria related
+to photo retrieval quality, processing performance, and usability.
 
 \subsection{Primary evaluation metric}
-\textbf{Time-to-acknowledgement (TTA):} time between complaint submission and ``Received/Assigned'' status creation in the system.
+
+\textbf{Photo retrieval precision:} the proportion of photographs
+returned by the system that actually contain the queried user.
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Target: median TTA $\le$ 2 hours during pilot window.
-    \item Attribution: measured from database timestamps (submission vs. first status update by staff).
+    \item The system will be tested using a labelled set of event
+    photographs where the actual presence of the target person is known.
+
+    \item The retrieved results will be compared with the expected
+    photographs to measure the quality of the matching process.
+
+    \item The similarity threshold will be adjusted using validation
+    photographs to obtain a practical balance between correct and
+    incorrect matches.
 \end{itemize}
 
 \subsection{Secondary evaluation metrics}
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Resolution time reduction:} reduce time-to-resolved compared to baseline process (even if baseline is collected via survey).
-    \item \textbf{Duplicate rate:} percentage of complaints flagged as duplicates and resolved without rework.
-    \item \textbf{User clarity:} citizen-reported clarity of status using a simple 1--5 feedback question.
-    \item \textbf{Reliability:} availability of staging/production for login and submission during business hours (e.g., $\ge$ 99\% uptime in pilot).
+    \item \textbf{Recall:} percentage of the target user's actual
+    photographs that are successfully retrieved.
+
+    \item \textbf{Retrieval time:} time taken by the system to return
+    matching photographs after a user's search request.
+
+    \item \textbf{Processing throughput:} number of event photographs
+    that can be processed within a given period.
+
+    \item \textbf{False-match rate:} proportion of retrieved
+    photographs that do not contain the target user.
+
+    \item \textbf{User experience:} ease with which a user can upload a
+    reference image, search the collection, and access the retrieved
+    photographs.
+
+    \item \textbf{System reliability:} successful completion of photo
+    upload, processing, search, and retrieval operations during
+    testing.
 \end{itemize}
 
 \subsection{Pilot validation plan %
-\BvrHint{\ldots high-level}}
+  \BvrHint{\ldots high-level}}
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Recruit 10--20 pilot users (citizens) and 3--5 staff roles (department simulation if real staff unavailable).
-    \item Compare metrics before/after within the iteration window by logging baseline estimates via short interviews or existing process observations.
+    \item Prepare a representative event photo collection containing
+    multiple people and different photographic conditions.
+
+    \item Select a small group of test users and provide each user with
+    one or more reference photographs.
+
+    \item Compare system-generated results against manually verified
+    photographs to evaluate precision and recall.
+
+    \item Measure retrieval time for different collection sizes to
+    understand how system performance changes as the number of
+    photographs increases.
+
+    \item Collect basic user feedback regarding the simplicity and
+    usefulness of the retrieval workflow.
 \end{itemize}
 
 \section{Scalability %
-\BvrHint{\ldots with foresight}}
-The proposition should scale in both theoretical and practical senses.
+  \BvrHint{\ldots with foresight}}
+
+The proposed system should be capable of handling growth in both the
+number of event photographs and the number of users.
 
 \begin{enumerate}[leftmargin=0.7cm]
-    \item \textbf{Scalable (theoretically):} The system should support growth in number of complaints and concurrent dashboard usage by:
+
+    \item \textbf{Scalable (theoretically):} The system can support
+    larger photo collections by:
     \begin{itemize}[leftmargin=0.7cm]
-        \item decoupling components (frontend/backend),
-        \item enabling pagination and indexing for common queries,
-        \item using stateless API design.
+        \item separating frontend, backend, and AI processing
+        responsibilities,
+        \item storing photo metadata separately from image files,
+        \item indexing frequently accessed database fields,
+        \item processing large photo collections in batches,
+        \item avoiding repeated face detection for photographs that
+        have already been processed.
     \end{itemize}
-    
-    \item \textbf{Operationally deployable (practically):} The system should run on common web hosting:
+
+    \item \textbf{Operationally deployable (practically):} The system
+    should be deployable using commonly available hosting and managed
+    services:
     \begin{itemize}[leftmargin=0.7cm]
-        \item managed database,
-        \item containerized or platform-hosted deployment,
-        \item CI/CD pipeline for staging/production.
+        \item ReactJS frontend deployment,
+        \item FastAPI backend deployment,
+        \item managed MongoDB database,
+        \item suitable image/object storage,
+        \item containerized or platform-hosted deployment where
+        appropriate.
     \end{itemize}
+
 \end{enumerate}
 
 \section{Engine availability heuristic}
-A mature set of ``engines'' (tooling/services) is available to implement this as a web-based project:
+
+A mature set of tools and services is available to implement the
+proposed Smart Photo Drive system:
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Web framework for REST APIs and templated/reactive pages.
-    \item Managed relational or document database.
-    \item Authentication approach (token-based or session-based).
-    \item Object storage for optional attachments (or local storage for pilot).
-    \item Test framework for unit/integration tests.
-    \item CI runner and staging deployment target.
+    \item \textbf{ReactJS} for the responsive web frontend.
+
+    \item \textbf{FastAPI} for backend REST APIs and integration of the
+    AI processing pipeline.
+
+    \item \textbf{MongoDB} for storing users, event information,
+    photograph metadata, and processing-related information.
+
+    \item \textbf{Computer vision and face-recognition models} for face
+    detection and matching.
+
+    \item \textbf{Python-based AI ecosystem} for image preprocessing,
+    model inference, and facial representation generation.
+
+    \item \textbf{Git and GitHub} for version control and collaborative
+    software development.
+
+    \item \textbf{Cloud or platform-based deployment services} for
+    making the application accessible through the web.
 \end{itemize}
-We will use these mature components to focus on workflow design, correctness, and measurement rather than inventing new infrastructure.
+
+These mature technologies allow the team to focus primarily on system
+integration, workflow design, photo retrieval accuracy, usability,
+testing, and deployment rather than developing all underlying
+infrastructure from scratch.
 
 \section{Project scope and deliverables %
-\BvrHint{\ldots iteration-friendly}}
+  \BvrHint{\ldots iteration-friendly}}
+
 \subsection{Initial deliverable %
-\BvrHint{\ldots first iteration}}
+  \BvrHint{\ldots first iteration}}
+
+The first implementation iteration will focus on establishing the
+complete basic retrieval pipeline:
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Citizen submission form + complaint ID generation
-    \item Staff workflow: update status and assignment
-    \item Citizen status page: view timeline/history
-    \item Basic logging and timestamps for TTA measurement
-    \item CI: build + backend unit tests + linting
-    \item CD to staging with a single command or pipeline job
+    \item Basic ReactJS web interface.
+    \item Event photo upload functionality for the administrator or
+    photographer.
+    \item Reference photograph upload for users.
+    \item Basic image validation and preprocessing.
+    \item Face detection in uploaded photographs.
+    \item Initial face representation and matching pipeline.
+    \item Retrieval and display of matching photographs.
+    \item FastAPI backend APIs connecting the frontend with the
+    processing pipeline.
+    \item MongoDB integration for storing application metadata.
 \end{itemize}
 
 \subsection{Subsequent deliverables}
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item Lightweight duplicate suggestions with staff review
-    \item Notification layer (email/SMS optional in later iteration; can start with in-app notifications)
-    \item Admin dashboard for metrics and backlog
-    \item Improved search/filtering and indexed queries for scale readiness
+    \item Improved face matching accuracy through model and threshold
+    evaluation.
+    \item Support for larger event photo collections.
+    \item User and administrator authentication where required.
+    \item Improved photo search and filtering.
+    \item Photo download and sharing functionality.
+    \item Processing-status indicators for large photo uploads.
+    \item Performance optimization for repeated searches.
+    \item Automated testing of frontend, backend, and AI-processing
+    components.
+    \item Deployment of the complete system to a web-accessible
+    environment.
+    \item Documentation of the architecture, APIs, testing, and
+    deployment process.
 \end{itemize}
 
 \section{Risks and mitigations}
+
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Data privacy / consent:} minimize collected data; keep attachments optional; store only what is needed.
-    \item \textbf{Staff adoption:} provide an easy UI for status updates; keep workflow steps minimal; include shortcuts.
-    \item \textbf{Evaluation measurement ambiguity:} instrument timestamps and define clear status transitions before development begins.
-    \item \textbf{Operational issues in pilot:} use staging early; ensure CI/CD produces repeatable deployments.
+
+    \item \textbf{Face recognition accuracy:} Differences in lighting,
+    pose, facial expressions, image quality, occlusion, and camera
+    angles may produce incorrect or missed matches. The system will be
+    evaluated using representative test images and the matching
+    threshold will be tuned accordingly.
+
+    \item \textbf{Large photo collections:} Processing thousands of
+    photographs may require substantial computation and time. Face
+    information can be precomputed during event-photo processing so
+    that subsequent user searches do not require complete
+    reprocessing.
+
+    \item \textbf{Privacy and consent:} Facial information and
+    photographs are sensitive user data. The system will minimize
+    unnecessary data collection, restrict access to photographs, and
+    provide appropriate controls for uploaded data.
+
+    \item \textbf{Storage requirements:} Large collections of
+    photographs may require significant storage. Image files and
+    metadata will be managed separately so that the database does not
+    unnecessarily store large binary files.
+
+    \item \textbf{Model and deployment limitations:} AI inference may
+    require more computational resources than ordinary web requests.
+    The team will evaluate model size and inference requirements while
+    selecting an approach suitable for the educational deployment.
+
+    \item \textbf{Evaluation ambiguity:} Retrieval quality can be
+    difficult to judge without ground-truth data. A labelled test
+    collection and manually verified expected results will be used for
+    precision and recall evaluation.
+
+    \item \textbf{Integration risk:} Frontend, backend, database, and
+    AI components may introduce integration issues. The system will be
+    developed incrementally with clearly defined APIs and regular
+    integration testing.
 \end{itemize}
 
 \section{Summary}
-This project proposes a deployable web platform to reduce grievance handling delays in a tier-2/3 city context. It meets the course criteria by emphasizing time-to-value through rapid iterations, implementing CI/CD to support frequent safe releases, and using measurable evaluation criteria (especially time-to-acknowledgement). It remains focused on engineering workflow and scalability readiness rather than research-driven novelty.
+
+This project proposes \textbf{Smart Photo Drive}, a deployable web-based platform designed to
+automatically find photographs of a user from large event photo
+collections.
+
+The system will allow a photographer or administrator to upload event
+photographs and allow users to provide a reference photograph
+containing their face. An AI-based face detection and recognition
+pipeline will then process the collection, identify candidate
+photographs containing the user, and present the results through a
+web-based interface.
+
+The project meets the software engineering objectives by emphasizing
+incremental development, measurable evaluation criteria, modular
+architecture, scalability, testing, version control, and deployment.
+The proposed ReactJS frontend, FastAPI backend, MongoDB database, and
+computer vision pipeline provide a practical foundation for developing
+the system while allowing the specific face-recognition model to be
+selected and evaluated during implementation.
+
+The final objective is to replace the traditional manual process of
+searching through thousands of event photographs with a faster,
+automated, and user-friendly photo retrieval experience.
 
 \end{document}
