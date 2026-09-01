@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Photo Drive — Activity Diagram</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .diagram-container { box-shadow: none; padding: 20px; border-radius: 0; }
+            @page { size: A3 landscape; margin: 15mm; }
+        }
+    </style>
+</head>
+<body>
+<div class="diagram-container">
+    <h1>Smart Photo Drive — Activity Diagram</h1>
+    <p class="subtitle">UCS503 Software Engineering · Team: Harshjyot, Archita, Jaiveer, Avneet · Submitted to: Ms. Nisha Thakur, TIET</p>
+
+    <svg viewBox="0 0 1400 2200" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Segoe UI, sans-serif">
+        <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+            </marker>
+            <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb" />
+            </marker>
+            <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+                <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.12" />
+            </filter>
+        </defs>
+
+        <!-- Swimlane backgrounds -->
+        <rect x="20" y="80" width="420" height="2080" fill="#f8faff" stroke="#ccc" stroke-width="1" stroke-dasharray="6,3" rx="6"/>
+        <rect x="440" y="80" width="460" height="2080" fill="#f8fff8" stroke="#ccc" stroke-width="1" stroke-dasharray="6,3" rx="6"/>
+        <rect x="900" y="80" width="480" height="2080" fill="#fffaf5" stroke="#ccc" stroke-width="1" stroke-dasharray="6,3" rx="6"/>
+
+        <!-- Swimlane headers -->
+        <rect x="20" y="80" width="420" height="40" fill="#dbeafe" rx="6"/>
+        <text x="230" y="106" text-anchor="middle" font-size="14" font-weight="600" fill="#1e40af">User / Event Manager</text>
+
+        <rect x="440" y="80" width="460" height="40" fill="#dcfce7" rx="6"/>
+        <text x="670" y="106" text-anchor="middle" font-size="14" font-weight="600" fill="#166534">System (Flask Backend)</text>
+
+        <rect x="900" y="80" width="480" height="40" fill="#ffedd5" rx="6"/>
+        <text x="1140" y="106" text-anchor="middle" font-size="14" font-weight="600" fill="#9a3412">External Services (MongoDB, Cloud, AI/CV)</text>
+
+        <!-- ========== AUTHENTICATION SECTION ========== -->
+
+        <!-- Start node -->
+        <circle cx="670" cy="155" r="14" fill="#1a1a1a"/>
+        <line x1="670" y1="169" x2="670" y2="190" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Open Application -->
+        <rect x="570" y="190" width="200" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="213" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Open Application</text>
+        <line x1="670" y1="226" x2="670" y2="246" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Enter Credentials -->
+        <rect x="550" y="246" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="269" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Enter Email &amp; Password</text>
+        <line x1="670" y1="282" x2="670" y2="302" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Verify Credentials -->
+        <rect x="530" y="302" width="280" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="325" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Verify Credentials in MongoDB</text>
+        <line x1="670" y1="338" x2="670" y2="365" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Valid? -->
+        <polygon points="670,365 720,395 670,425 620,395" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="670" y="400" text-anchor="middle" font-size="11" font-weight="600" fill="#713f12">Valid?</text>
+
+        <!-- [No] → Show Error → loop back -->
+        <line x1="620" y1="395" x2="480" y2="395" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="555" y="388" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <rect x="370" y="377" width="110" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="425" y="400" text-anchor="middle" font-size="11" font-weight="500" fill="#7f1d1d">Show Error</text>
+        <!-- Loop arrow back up -->
+        <line x1="425" y1="377" x2="425" y2="264" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="425" y1="264" x2="550" y2="264" stroke="#999" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+
+        <!-- [Yes] → Generate JWT -->
+        <line x1="670" y1="425" x2="670" y2="452" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="690" y="442" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+
+        <rect x="555" y="452" width="230" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="475" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Generate JWT Token</text>
+        <line x1="670" y1="488" x2="670" y2="508" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Issue JWT -->
+        <rect x="530" y="508" width="280" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="531" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Issue JWT &amp; Route to Dashboard</text>
+        <line x1="670" y1="544" x2="670" y2="575" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Role? -->
+        <polygon points="670,575 730,610 670,645 610,610" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="670" y="615" text-anchor="middle" font-size="11" font-weight="600" fill="#713f12">Role?</text>
+
+        <!-- [User] label and arrow left -->
+        <line x1="610" y1="610" x2="230" y2="610" stroke="#333" stroke-width="1.5"/>
+        <text x="420" y="603" text-anchor="middle" font-size="10" font-weight="600" fill="#2563eb">[User]</text>
+        <line x1="230" y1="610" x2="230" y2="650" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- [Event Manager] label and arrow right -->
+        <line x1="730" y1="610" x2="1140" y2="610" stroke="#333" stroke-width="1.5"/>
+        <text x="920" y="603" text-anchor="middle" font-size="10" font-weight="600" fill="#ea580c">[Event Manager]</text>
+        <line x1="1140" y1="610" x2="1140" y2="650" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- ========== PATH LABELS ========== -->
+        <rect x="55" y="636" width="120" height="22" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+        <text x="115" y="651" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">USER PATH</text>
+
+        <rect x="1060" y="636" width="160" height="22" rx="4" fill="#ffedd5" stroke="#ea580c" stroke-width="1"/>
+        <text x="1140" y="651" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412">EVENT MANAGER PATH</text>
+
+        <!-- ========== EVENT MANAGER PATH ========== -->
+
+        <!-- Create Event -->
+        <rect x="1020" y="670" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="693" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Create Event (name, date, venue)</text>
+        <line x1="1140" y1="706" x2="1140" y2="726" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Store Event in MongoDB -->
+        <rect x="1020" y="726" width="240" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="749" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Store Event in MongoDB</text>
+        <line x1="1140" y1="762" x2="1140" y2="782" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Upload Event Photos -->
+        <rect x="1020" y="782" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="805" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Upload Event Photos (batch)</text>
+        <line x1="1140" y1="818" x2="1140" y2="838" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Store in Cloud -->
+        <rect x="1010" y="838" width="260" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="861" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Store Photos in Cloud (S3/Cloudinary)</text>
+        <line x1="1140" y1="874" x2="1140" y2="894" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Trigger Processing -->
+        <rect x="1020" y="894" width="240" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="917" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Trigger Photo Processing</text>
+        <line x1="1140" y1="930" x2="1140" y2="955" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- FORK BAR -->
+        <rect x="990" y="955" width="300" height="6" rx="3" fill="#1a1a1a"/>
+        <text x="985" y="963" text-anchor="end" font-size="9" font-weight="600" fill="#666">FORK</text>
+
+        <!-- Branch: Detect Faces -->
+        <line x1="1140" y1="961" x2="1140" y2="985" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <rect x="1010" y="985" width="260" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="1008" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Detect Faces — OpenCV (HOG)</text>
+        <line x1="1140" y1="1021" x2="1140" y2="1048" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Faces Found? -->
+        <polygon points="1140,1048 1200,1080 1140,1112 1080,1080" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="1140" y="1084" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Faces?</text>
+
+        <!-- [No] Log -->
+        <line x1="1200" y1="1080" x2="1320" y2="1080" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="1255" y="1073" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <rect x="1290" y="1062" width="80" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="1330" y="1083" text-anchor="middle" font-size="9" font-weight="500" fill="#7f1d1d">Log: Skip</text>
+        <!-- Arrow down from Log to join -->
+        <line x1="1330" y1="1098" x2="1330" y2="1230" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="1330" y1="1230" x2="1300" y2="1230" stroke="#999" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+
+        <!-- [Yes] → Generate Embeddings -->
+        <line x1="1140" y1="1112" x2="1140" y2="1140" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="1160" y="1130" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+
+        <rect x="990" y="1140" width="300" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="1163" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Generate 128-D Embeddings (dlib)</text>
+        <line x1="1140" y1="1176" x2="1140" y2="1196" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Store Embeddings -->
+        <rect x="1000" y="1196" width="280" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="1219" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Store Embeddings in MongoDB</text>
+        <line x1="1140" y1="1232" x2="1140" y2="1250" stroke="#333" stroke-width="1.5"/>
+
+        <!-- JOIN BAR -->
+        <rect x="990" y="1250" width="300" height="6" rx="3" fill="#1a1a1a"/>
+        <text x="985" y="1258" text-anchor="end" font-size="9" font-weight="600" fill="#666">JOIN</text>
+        <line x1="1140" y1="1256" x2="1140" y2="1280" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Mark as Processed -->
+        <rect x="1010" y="1280" width="260" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="1140" y="1303" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Mark Event as Processed ✓</text>
+        <line x1="1140" y1="1316" x2="1140" y2="1345" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Continue? -->
+        <polygon points="1140,1345 1200,1375 1140,1405 1080,1375" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="1140" y="1380" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">More?</text>
+
+        <!-- [Yes] loop back -->
+        <line x1="1200" y1="1375" x2="1310" y2="1375" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="1255" y="1368" text-anchor="middle" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+        <line x1="1310" y1="1375" x2="1310" y2="680" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="1310" y1="680" x2="1260" y2="688" stroke="#999" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+
+        <!-- [No] goes down to logout merge -->
+        <line x1="1140" y1="1405" x2="1140" y2="1900" stroke="#333" stroke-width="1.5"/>
+        <text x="1160" y="1420" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <line x1="1140" y1="1900" x2="670" y2="1900" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- ========== USER PATH ========== -->
+
+        <!-- Browse Events -->
+        <rect x="110" y="670" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="230" y="693" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Browse Available Events</text>
+        <line x1="230" y1="706" x2="230" y2="726" stroke="#333" stroke-width="1.5"/>
+        <!-- Arrow to system lane -->
+        <line x1="230" y1="726" x2="560" y2="726" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Fetch Events from MongoDB -->
+        <rect x="510" y="714" width="300" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="660" y="737" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Fetch Processed Events from MongoDB</text>
+        <line x1="660" y1="750" x2="660" y2="770" stroke="#333" stroke-width="1.5"/>
+        <line x1="660" y1="770" x2="230" y2="770" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Select an Event -->
+        <rect x="110" y="780" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="230" y="803" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Select an Event</text>
+        <line x1="230" y1="816" x2="230" y2="846" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Upload Selfie -->
+        <rect x="110" y="846" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="230" y="869" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Upload Reference Selfie</text>
+        <line x1="230" y1="882" x2="230" y2="902" stroke="#333" stroke-width="1.5"/>
+        <line x1="230" y1="902" x2="560" y2="902" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Detect Face in Selfie -->
+        <rect x="510" y="888" width="280" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="650" y="911" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Detect Face in Selfie (OpenCV)</text>
+        <line x1="650" y1="924" x2="650" y2="955" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Face Detected? -->
+        <polygon points="650,955 720,990 650,1025 580,990" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="650" y="994" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Face?</text>
+
+        <!-- [No] → Error -->
+        <line x1="580" y1="990" x2="120" y2="990" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="350" y="983" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <rect x="35" y="972" width="130" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="100" y="995" text-anchor="middle" font-size="10" font-weight="500" fill="#7f1d1d">Error: No Face</text>
+        <!-- Loop back up to Upload Selfie -->
+        <line x1="60" y1="972" x2="60" y2="864" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="60" y1="864" x2="110" y2="864" stroke="#999" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+
+        <!-- [Yes] → Generate Embedding -->
+        <line x1="650" y1="1025" x2="650" y2="1055" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="670" y="1045" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+
+        <rect x="490" y="1055" width="320" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="650" y="1078" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Generate 128-D Embedding from Selfie (dlib)</text>
+        <line x1="650" y1="1091" x2="650" y2="1115" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Fetch Event Embeddings -->
+        <rect x="500" y="1115" width="300" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="650" y="1138" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Fetch Event Embeddings from MongoDB</text>
+        <line x1="650" y1="1151" x2="650" y2="1175" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Compare Embeddings -->
+        <rect x="460" y="1175" width="380" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="650" y="1198" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Compare Embeddings (Euclidean Distance ≤ 0.6)</text>
+        <line x1="650" y1="1211" x2="650" y2="1240" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Matches? -->
+        <polygon points="650,1240 720,1275 650,1310 580,1275" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="650" y="1280" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Matches?</text>
+
+        <!-- [No] → No Matching Photos -->
+        <line x1="580" y1="1275" x2="120" y2="1275" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="350" y="1268" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <rect x="35" y="1257" width="160" height="36" rx="18" fill="#fef9c3" stroke="#eab308" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="115" y="1280" text-anchor="middle" font-size="10" font-weight="500" fill="#713f12">No Matching Photos</text>
+        <!-- Arrow down to Search Again -->
+        <line x1="115" y1="1293" x2="115" y2="1700" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="115" y1="1700" x2="210" y2="1700" stroke="#999" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+
+        <!-- [Yes] → Retrieve Matching Photos -->
+        <line x1="650" y1="1310" x2="650" y2="1340" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="670" y="1330" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+
+        <rect x="510" y="1340" width="280" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="650" y="1363" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Retrieve Matching Photo URLs</text>
+        <line x1="650" y1="1376" x2="650" y2="1400" stroke="#333" stroke-width="1.5"/>
+        <line x1="650" y1="1400" x2="230" y2="1400" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Display Matched Photos -->
+        <rect x="100" y="1400" width="260" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="230" y="1423" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Display Matched Photos to User</text>
+        <line x1="230" y1="1436" x2="230" y2="1466" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- View Full-Size -->
+        <rect x="110" y="1466" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="230" y="1489" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">View Photos Full-Size</text>
+        <line x1="230" y1="1502" x2="230" y2="1530" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Download? -->
+        <polygon points="230,1530 295,1560 230,1590 165,1560" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="230" y="1565" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Download?</text>
+
+        <!-- [Yes] → Select & Download -->
+        <line x1="295" y1="1560" x2="410" y2="1560" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="350" y="1553" text-anchor="middle" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+
+        <rect x="370" y="1542" width="220" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="480" y="1565" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Select Photos for Download</text>
+        <line x1="590" y1="1560" x2="660" y2="1560" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Generate Signed URLs -->
+        <rect x="610" y="1542" width="260" height="36" rx="18" fill="#ffedd5" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="740" y="1565" text-anchor="middle" font-size="12" font-weight="500" fill="#7c2d12">Generate Signed Cloud URLs</text>
+        <line x1="740" y1="1578" x2="740" y2="1610" stroke="#333" stroke-width="1.5"/>
+        <line x1="740" y1="1610" x2="230" y2="1610" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Download Photos -->
+        <rect x="110" y="1610" width="240" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="230" y="1633" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Download Photos</text>
+        <line x1="230" y1="1646" x2="230" y2="1680" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- [No] → skip download -->
+        <line x1="165" y1="1560" x2="80" y2="1560" stroke="#333" stroke-width="1.5"/>
+        <text x="120" y="1553" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <line x1="80" y1="1560" x2="80" y2="1695" stroke="#333" stroke-width="1.5"/>
+        <line x1="80" y1="1695" x2="190" y2="1695" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Decision: Search Again? -->
+        <polygon points="230,1680 310,1715 230,1750 150,1715" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+        <text x="230" y="1720" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Search Again?</text>
+
+        <!-- [Yes] loop back -->
+        <line x1="150" y1="1715" x2="50" y2="1715" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="100" y="1708" text-anchor="middle" font-size="10" font-weight="600" fill="#16a34a">[Yes]</text>
+        <line x1="50" y1="1715" x2="50" y2="688" stroke="#999" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="50" y1="688" x2="110" y2="688" stroke="#999" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+
+        <!-- [No] → Logout -->
+        <line x1="230" y1="1750" x2="230" y2="1900" stroke="#333" stroke-width="1.5"/>
+        <text x="250" y="1770" font-size="10" font-weight="600" fill="#dc2626">[No]</text>
+        <line x1="230" y1="1900" x2="570" y2="1900" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- ========== COMMON EXIT ========== -->
+
+        <!-- Merge node -->
+        <polygon points="670,1880 700,1900 670,1920 640,1900" fill="#e5e7eb" stroke="#6b7280" stroke-width="1.5"/>
+
+        <!-- Logout -->
+        <line x1="670" y1="1920" x2="670" y2="1945" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <rect x="570" y="1945" width="200" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="1968" text-anchor="middle" font-size="12" font-weight="500" fill="#1e3a5f">Logout</text>
+        <line x1="670" y1="1981" x2="670" y2="2005" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Invalidate JWT -->
+        <rect x="545" y="2005" width="250" height="36" rx="18" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+        <text x="670" y="2028" text-anchor="middle" font-size="12" font-weight="500" fill="#14532d">Invalidate JWT Session</text>
+        <line x1="670" y1="2041" x2="670" y2="2070" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- End node -->
+        <circle cx="670" cy="2090" r="14" fill="white" stroke="#1a1a1a" stroke-width="2.5"/>
+        <circle cx="670" cy="2090" r="8" fill="#1a1a1a"/>
+
+        <!-- ========== LEGEND ========== -->
+        <rect x="440" y="2120" width="460" height="50" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+        <text x="470" y="2142" font-size="11" font-weight="700" fill="#374151">Legend:</text>
+
+        <rect x="530" y="2130" width="18" height="14" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+        <text x="554" y="2142" font-size="10" fill="#374151">Actor Action</text>
+
+        <rect x="640" y="2130" width="18" height="14" rx="7" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/>
+        <text x="664" y="2142" font-size="10" fill="#374151">System Action</text>
+
+        <rect x="760" y="2130" width="18" height="14" rx="7" fill="#ffedd5" stroke="#f97316" stroke-width="1"/>
+        <text x="784" y="2142" font-size="10" fill="#374151">External Service</text>
+
+        <polygon points="530,2158 542,2165 530,2172 518,2165" fill="#fef9c3" stroke="#ca8a04" stroke-width="1"/>
+        <text x="554" y="2169" font-size="10" fill="#374151">Decision</text>
+
+        <rect x="640" y="2158" width="30" height="5" rx="2" fill="#1a1a1a"/>
+        <text x="676" y="2167" font-size="10" fill="#374151">Fork/Join</text>
+
+        <circle cx="770" cy="2163" r="7" fill="#1a1a1a"/>
+        <text x="784" y="2167" font-size="10" fill="#374151">Start</text>
+
+        <circle cx="830" cy="2163" r="7" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+        <circle cx="830" cy="2163" r="4" fill="#1a1a1a"/>
+        <text x="844" y="2167" font-size="10" fill="#374151">End</text>
+    </svg>
+</div>
+</body>
+</html>
