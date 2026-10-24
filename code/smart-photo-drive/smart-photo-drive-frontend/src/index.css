@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Anton", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --color-ink: #151417;
+  --color-ink-soft: #1e1c21;
+  --color-chrome: #2a282e;
+  --color-paper: #ede7d8;
+  --color-paper-dim: #d9d2bd;
+  --color-safelight: #c1272d;
+  --color-safelight-dim: #7e1a1f;
+  --color-amber: #e8a33d;
+  --color-develop: #6b9b6e;
+  --color-ash: #8b8880;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+}
+
+.sprockets {
+  background-image: radial-gradient(circle, var(--color-ink) 3px, transparent 3.5px);
+  background-size: 22px 100%;
+  background-position: 10px center;
+  height: 14px;
+}
+
+.stamp { transform: rotate(-6deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
