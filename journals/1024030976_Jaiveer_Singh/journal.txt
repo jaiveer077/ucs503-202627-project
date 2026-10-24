@@ -1,0 +1,7 @@
+24 October 2026 — Project progress summary
+
+Smart Photo Drive now has a React frontend and Flask API for separate event-manager and attendee accounts. Managers can create events, upload photos, view processing counts, and delete events. Attendees can browse events and search for their photos using a single-face reference image.
+
+The backend detects faces during upload, stores their encodings and photo metadata in MongoDB, and compares saved encodings during search. Photos are stored locally, with optional private Google Cloud Storage support. Access uses role-based JWTs and one-hour photo links.
+
+The core end-to-end workflow is implemented. Recognition accuracy evaluation, larger-scale processing, and deployment automation remain future work.
