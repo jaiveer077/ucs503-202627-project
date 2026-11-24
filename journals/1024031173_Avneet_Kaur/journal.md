@@ -5,7 +5,6 @@
 **Course:** UCS503 – Software Engineering  
 **Project:** Smart Photo Drive  
 **Period:** August–November 2026  
-**Note:** Dates and weekly activities are retrospectively reconstructed and should be checked against the actual project timeline.
 
 ### Week 1 – Project Initiation (August)
 
