@@ -2,3 +2,11 @@ node_modules/
 dist/
 .env
 .env.*
+
+# Local/generated files
+.vscode/
+**/__pycache__/
+**/*.pyc
+**/uploads/
+image_dataset/
+test_image.png

@@ -98,7 +98,15 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173`. Register as a manager to create an event and upload photos, then register as an attendee to search that event with a clear, single-face reference photo. Run `npm run build` to build the frontend or `npm run lint` to check its source.
+Open `http://localhost:5173`. Register as a manager to create an event, upload a required attendee CSV, and upload photos. The CSV must be UTF-8, at most 1 MB, and have an `email_id` column (also accepts `email_ids` or `email`) with one address per row. For example:
+
+```csv
+email_id
+attendee@example.com
+another@example.com
+```
+
+Register as an attendee using an email address on that event's list to search it with a clear, single-face reference photo. Managers can replace an event's CSV from the dashboard; existing events need a CSV before attendees can access them. Run `npm run build` to build the frontend or `npm run lint` to check its source.
 
 ## Configuration and access
 
@@ -111,7 +119,7 @@ Open `http://localhost:5173`. Register as a manager to create an event and uploa
 | `GCS_BUCKET_NAME`, `GOOGLE_APPLICATION_CREDENTIALS` | Optional private GCS bucket and service-account credentials. |
 | `VITE_API_BASE` | Optional frontend API base URL; defaults to `http://localhost:5000`. |
 
-Keep `.env` and service-account credentials private. Public event listings expose event details but not original photos; only the owning manager can list their event photos, and attendee searches return links for matches. Direct access to the uploads directory is disabled. A GCS bucket must have public access disabled separately. Photo links expire after one hour, and a fresh search generates new links.
+Keep `.env` and service-account credentials private. Public event listings expose event details but not original photos; only the owning manager can list their event photos. Attendees can search only events whose CSV includes their account email; photo links also check the current list. Direct access to the uploads directory is disabled. A GCS bucket must have public access disabled separately, and cloud photos are served through the same backend access check. Photo links expire after one hour, and a fresh search generates new links.
 
 The backend accepts PNG, JPEG, and WebP images, limits individual images to 20 MB and 40 megapixels, and limits a request to 80 MB. The frontend sends manager uploads in groups of three. To move existing local photos to configured GCS storage, run `python migrate_to_gcs.py` from the backend directory.
 
