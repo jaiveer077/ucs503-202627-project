@@ -3,6 +3,9 @@ import shutil
 import datetime
 import uuid
 import re
+import csv
+import io
+import mimetypes
 from functools import wraps
 
 import bcrypt
@@ -10,7 +13,7 @@ import jwt
 from bson import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, send_from_directory, redirect
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
@@ -36,6 +39,8 @@ UPLOAD_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 MAX_PHOTO_BYTES = 20 * 1024 * 1024
 MAX_PHOTO_PIXELS = 40_000_000
+MAX_ATTENDEE_CSV_BYTES = 1024 * 1024
+MAX_ATTENDEES = 20_000
 app.config["MAX_CONTENT_LENGTH"] = 80 * 1024 * 1024
 os.makedirs(UPLOAD_ROOT, exist_ok=True)
 
@@ -97,9 +102,9 @@ require_manager = _require_role("manager", "manager_id")
 require_user = _require_role("user", "user_id")
 
 
-def photo_access_url(doc):
+def photo_access_url(doc, role, account_id):
     token = jwt.encode(
-        {"type": "photo", "photo_id": str(doc["_id"]),
+        {"type": "photo", "photo_id": str(doc["_id"]), "role": role, "sub": str(account_id),
          "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=PHOTO_LINK_EXPIRY_MINUTES)},
         JWT_SECRET, algorithm="HS256",
     )
@@ -110,7 +115,7 @@ def serialize_event(doc, include_cover=False):
     cover = None
     if include_cover:
         first = photos.find_one({"event_id": doc["_id"]}, {"_id": 1})
-        cover = photo_access_url(first) if first else None
+        cover = photo_access_url(first, "manager", request.manager_id) if first else None
     return {
         "id": str(doc["_id"]),
         "name": doc["name"],
@@ -120,6 +125,8 @@ def serialize_event(doc, include_cover=False):
         "scannedCount": doc.get("scanned_count"),
         "scanFailureCount": doc.get("scan_failure_count"),
         "faceCount": doc.get("face_count"),
+        "attendeeCount": len(doc.get("attendee_emails", [])),
+        "hasAttendeeList": "attendee_emails" in doc,
         "cover": cover,
     }
 
@@ -138,6 +145,49 @@ def image_error(path):
             image.verify()
     except Exception:
         return "invalid image"
+    return None
+
+
+def parse_attendee_csv(upload):
+    if not upload or not upload.filename or not upload.filename.lower().endswith(".csv"):
+        return None, "Upload an attendee CSV file."
+    raw = upload.stream.read(MAX_ATTENDEE_CSV_BYTES + 1)
+    if len(raw) > MAX_ATTENDEE_CSV_BYTES:
+        return None, "Attendee CSV must be 1 MB or smaller."
+    try:
+        rows = csv.reader(io.StringIO(raw.decode("utf-8-sig"), newline=""), strict=True)
+        header = next(rows)
+        columns = [column.strip().lower() for column in header]
+        email_column = next((columns.index(name) for name in ("email_id", "email_ids", "email") if name in columns), None)
+        if email_column is None:
+            return None, "CSV needs an email_id, email_ids, or email column header."
+        emails = set()
+        for row_number, row in enumerate(rows, start=2):
+            if not row or all(not cell.strip() for cell in row):
+                continue
+            email = row[email_column].strip().lower() if len(row) > email_column else ""
+            if not re.fullmatch(r"[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+", email):
+                return None, f"Invalid email in CSV row {row_number}."
+            emails.add(email)
+            if len(emails) > MAX_ATTENDEES:
+                return None, f"Attendee CSV cannot contain more than {MAX_ATTENDEES:,} unique emails."
+    except (UnicodeDecodeError, csv.Error, StopIteration):
+        return None, "Attendee CSV must be a valid UTF-8 CSV with a header row."
+    if not emails:
+        return None, "Attendee CSV must contain at least one email address."
+    return sorted(emails), None
+
+
+def attendee_access_error(event):
+    try:
+        user_id = ObjectId(request.user_id)
+    except InvalidId:
+        return jsonify({"error": "Invalid session. Please log in again."}), 401
+    user = users.find_one({"_id": user_id}, {"email": 1})
+    if not user:
+        return jsonify({"error": "Account not found. Please log in again."}), 401
+    if user.get("email", "").strip().lower() not in event.get("attendee_emails", []):
+        return jsonify({"error": "Your account email is not on this event's attendee list."}), 403
     return None
 
 
@@ -286,6 +336,21 @@ def get_event(event_id):
     return jsonify(serialize_event(doc)), 200
 
 
+@app.get("/api/user/events/<event_id>/access")
+@require_user
+def check_event_access(event_id):
+    try:
+        event = events.find_one({"_id": ObjectId(event_id)})
+    except InvalidId:
+        return jsonify({"error": "Invalid event id"}), 400
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+    error = attendee_access_error(event)
+    if error:
+        return error
+    return jsonify({"allowed": True}), 200
+
+
 @app.get("/api/events/<event_id>/photos")
 @require_manager
 def list_event_photos(event_id):
@@ -299,19 +364,22 @@ def list_event_photos(event_id):
     if str(event.get("manager_id")) != str(request.manager_id):
         return jsonify({"error": "You don't manage this event"}), 403
     docs = photos.find({"event_id": oid}, {"filename": 1})
-    return jsonify([{"filename": d["filename"], "url": photo_access_url(d)} for d in docs]), 200
+    return jsonify([{"filename": d["filename"], "url": photo_access_url(d, "manager", request.manager_id)} for d in docs]), 200
 
 
 @app.post("/api/manager/events")
 @require_manager
 def create_event():
-    data = request.get_json(silent=True) or {}
+    data = request.form
     name = (data.get("name") or "").strip()
     date = (data.get("date") or "").strip()
     location = (data.get("location") or "").strip()
 
     if not name:
         return jsonify({"error": "Event name is required"}), 400
+    attendee_emails, error = parse_attendee_csv(request.files.get("attendees"))
+    if error:
+        return jsonify({"error": error}), 400
 
     result = events.insert_one(
         {
@@ -319,6 +387,7 @@ def create_event():
             "date": date,
             "location": location,
             "manager_id": request.manager_id,
+            "attendee_emails": attendee_emails,
             "photo_count": 0,
             "scanned_count": 0,
             "scan_failure_count": 0,
@@ -327,6 +396,26 @@ def create_event():
     )
     doc = events.find_one({"_id": result.inserted_id})
     return jsonify(serialize_event(doc)), 201
+
+
+@app.put("/api/manager/events/<event_id>/attendees")
+@require_manager
+def replace_event_attendees(event_id):
+    try:
+        oid = ObjectId(event_id)
+    except InvalidId:
+        return jsonify({"error": "Invalid event id"}), 400
+    event = events.find_one({"_id": oid})
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+    if str(event.get("manager_id")) != str(request.manager_id):
+        return jsonify({"error": "You don't manage this event"}), 403
+    attendee_emails, error = parse_attendee_csv(request.files.get("attendees"))
+    if error:
+        return jsonify({"error": error}), 400
+    events.update_one({"_id": oid}, {"$set": {"attendee_emails": attendee_emails}})
+    event["attendee_emails"] = attendee_emails
+    return jsonify(serialize_event(event, include_cover=True)), 200
 
 
 # ---------------------------------------------------------------------------
@@ -451,18 +540,21 @@ def upload_event_photos(event_id):
 @app.post("/api/user/events/<event_id>/search")
 @require_user
 def search_event(event_id):
-    if not face_matching.FACE_MATCHING_AVAILABLE:
-        return jsonify(
-            {"error": "Face matching isn't installed on this server yet. See backend README."}
-        ), 501
-
     try:
         oid = ObjectId(event_id)
     except InvalidId:
         return jsonify({"error": "Invalid event id"}), 400
 
-    if not events.find_one({"_id": oid}):
+    event = events.find_one({"_id": oid})
+    if not event:
         return jsonify({"error": "Event not found"}), 404
+    error = attendee_access_error(event)
+    if error:
+        return error
+    if not face_matching.FACE_MATCHING_AVAILABLE:
+        return jsonify(
+            {"error": "Face matching isn't installed on this server yet. See backend README."}
+        ), 501
 
     reference_file = request.files.get("reference")
     if not reference_file or not reference_file.filename:
@@ -507,7 +599,7 @@ def search_event(event_id):
                 {
                     "filename": photo_doc["filename"],
                     "confidence": face_matching.distance_to_confidence(distance),
-                    "url": photo_access_url(photo_doc),
+                    "url": photo_access_url(photo_doc, "user", request.user_id),
                 }
             )
 
@@ -538,15 +630,35 @@ def serve_photo(photo_id):
     photo = photos.find_one({"_id": oid})
     if not photo:
         return jsonify({"error": "Photo not found"}), 404
+    event = events.find_one({"_id": photo["event_id"]})
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+    try:
+        account_id = ObjectId(payload.get("sub", ""))
+    except (InvalidId, TypeError):
+        return jsonify({"error": "Invalid photo link"}), 403
+    if payload.get("role") == "user":
+        user = users.find_one({"_id": account_id}, {"email": 1})
+        if not user or user.get("email", "").strip().lower() not in event.get("attendee_emails", []):
+            return jsonify({"error": "Your account email is not on this event's attendee list."}), 403
+    elif payload.get("role") == "manager":
+        manager = managers.find_one({"_id": account_id}, {"_id": 1})
+        if not manager or str(event.get("manager_id")) != str(account_id):
+            return jsonify({"error": "You don't manage this event"}), 403
+    else:
+        return jsonify({"error": "Invalid photo link"}), 403
     local_dir = os.path.join(UPLOAD_ROOT, str(photo["event_id"]))
     if photo.get("storage_type") == "gcs":
         try:
-            response = redirect(cloud_storage.signed_download_url(str(photo["event_id"]), photo["filename"],
-                                                                   download=request.args.get("download") == "1"))
+            content = cloud_storage.download_photo(str(photo["event_id"]), photo["filename"])
+            response = send_file(io.BytesIO(content),
+                                 mimetype=mimetypes.guess_type(photo["filename"])[0] or "application/octet-stream",
+                                 as_attachment=request.args.get("download") == "1",
+                                 download_name=photo["filename"])
             response.headers["Cache-Control"] = "private, no-store"
             return response
         except Exception as exc:
-            app.logger.error("Could not sign cloud photo %s: %s", photo_id, exc)
+            app.logger.error("Could not download cloud photo %s: %s", photo_id, exc)
             if not os.path.isfile(os.path.join(local_dir, photo["filename"])):
                 return jsonify({"error": "Photo temporarily unavailable"}), 503
     response = send_from_directory(local_dir,

@@ -7,7 +7,6 @@ search; it asks is_configured() before trying Google Cloud Storage.
 """
 
 import os
-import datetime
 
 from dotenv import load_dotenv
 
@@ -73,11 +72,10 @@ def upload_photo(local_path, event_id, filename):
     return blob.public_url
 
 
-def signed_download_url(event_id, filename, download=False):
-    """Issue a short-lived URL for a private cloud photo."""
+def download_photo(event_id, filename):
+    """Read a private cloud photo after the API has checked event access."""
     blob = _get_client().bucket(_bucket_name()).blob(f"{event_id}/{filename}")
-    options = {"response_disposition": "attachment"} if download else {}
-    return blob.generate_signed_url(version="v4", expiration=datetime.timedelta(minutes=60), method="GET", **options)
+    return blob.download_as_bytes()
 
 
 def delete_photo(event_id, filename):
