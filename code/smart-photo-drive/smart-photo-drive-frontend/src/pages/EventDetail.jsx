@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { API_BASE } from '../config'
 import { getAuth } from '../auth'
@@ -10,8 +10,26 @@ export default function EventDetail() {
   const [preview, setPreview] = useState(null)
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState('')
+  const [access, setAccess] = useState({ eventId: null, status: 'loading', error: '' })
 
   const { token, role } = getAuth()
+
+  useEffect(() => {
+    if (!token || role !== 'user') return
+    const controller = new AbortController()
+    fetch(`${API_BASE}/api/user/events/${eventId}/access`, {
+      headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
+    }).then(async (res) => {
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Could not check event access.')
+      setAccess({ eventId, status: 'allowed', error: '' })
+    }).catch((err) => {
+      if (err.name !== 'AbortError') {
+        setAccess({ eventId, status: 'denied', error: err.message })
+      }
+    })
+    return () => controller.abort()
+  }, [eventId, token, role])
 
   function handleFile(e) {
     const f = e.target.files?.[0]
@@ -43,6 +61,9 @@ export default function EventDetail() {
 
       if (!res.ok) {
         setError(data.error || 'Search failed.')
+        if (res.status === 403) {
+          setAccess({ eventId, status: 'denied', error: data.error || 'You cannot access this event.' })
+        }
         setSearching(false)
         return
       }
@@ -66,6 +87,16 @@ export default function EventDetail() {
       <div className="max-w-md mx-auto px-6 py-20 text-center">
         <p className="text-ash mb-4">You need to be logged in as an attendee to search for your photos.</p>
         <Link to="/login" className="text-safelight hover:underline">Go to login</Link>
+      </div>
+    )
+  }
+
+  const accessStatus = access.eventId === eventId ? access.status : 'loading'
+  if (accessStatus !== 'allowed') {
+    return (
+      <div className="max-w-md mx-auto px-6 py-20 text-center">
+        <p className="text-ash mb-4">{accessStatus === 'loading' ? 'Checking your event access…' : access.error}</p>
+        {accessStatus === 'denied' && <Link to="/events" className="text-safelight hover:underline">Browse events</Link>}
       </div>
     )
   }

@@ -9,6 +9,8 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [newEvent, setNewEvent] = useState({ name: '', date: '', location: '' })
+  const [attendeeFile, setAttendeeFile] = useState(null)
+  const [creating, setCreating] = useState(false)
   const [uploadingId, setUploadingId] = useState(null)
   const [uploadProgress, setUploadProgress] = useState('')
 
@@ -42,19 +44,48 @@ export default function ManagerDashboard() {
 
   async function createEvent(e) {
     e.preventDefault()
-    if (!newEvent.name.trim()) return
+    if (!newEvent.name.trim() || !attendeeFile) {
+      setError('Enter an event name and choose an attendee CSV.')
+      return
+    }
     setError('')
+    setCreating(true)
     try {
+      const formData = new FormData()
+      Object.entries(newEvent).forEach(([key, value]) => formData.append(key, value))
+      formData.append('attendees', attendeeFile)
       const res = await fetch(`${API_BASE}/api/manager/events`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeader },
-        body: JSON.stringify(newEvent),
+        headers: authHeader,
+        body: formData,
       })
       if (res.status === 401) return handleExpired()
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Could not create the event.'); return }
       setEvents((prev) => [data, ...prev])
       setNewEvent({ name: '', date: '', location: '' })
+      setAttendeeFile(null)
+      e.target.reset()
+    } catch {
+      setError('Could not reach the server.')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  async function replaceAttendees(eventId, file) {
+    if (!file) return
+    setError('')
+    const formData = new FormData()
+    formData.append('attendees', file)
+    try {
+      const res = await fetch(`${API_BASE}/api/manager/events/${eventId}/attendees`, {
+        method: 'PUT', headers: authHeader, body: formData,
+      })
+      if (res.status === 401) return handleExpired()
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Could not update attendees.'); return }
+      setEvents((prev) => prev.map((event) => event.id === eventId ? data : event))
     } catch {
       setError('Could not reach the server.')
     }
@@ -144,10 +175,14 @@ export default function ManagerDashboard() {
       <h1 className="font-display text-4xl mb-8">Your events</h1>
 
       <form onSubmit={createEvent} className="grid sm:grid-cols-4 gap-3 mb-6 max-w-2xl">
-        <input value={newEvent.name} onChange={(e) => setNewEvent((n) => ({ ...n, name: e.target.value }))} placeholder="Event name" className="sm:col-span-2 bg-ink-soft border border-chrome rounded px-3 py-2 text-paper focus:outline-none focus:border-safelight" />
+        <input required value={newEvent.name} onChange={(e) => setNewEvent((n) => ({ ...n, name: e.target.value }))} placeholder="Event name" className="sm:col-span-2 bg-ink-soft border border-chrome rounded px-3 py-2 text-paper focus:outline-none focus:border-safelight" />
         <input value={newEvent.date} onChange={(e) => setNewEvent((n) => ({ ...n, date: e.target.value }))} type="date" className="bg-ink-soft border border-chrome rounded px-3 py-2 text-paper focus:outline-none focus:border-safelight" />
-        <button type="submit" className="px-4 py-2 bg-safelight rounded font-mono text-xs uppercase tracking-wide hover:bg-safelight-dim transition-colors">Create event</button>
+        <button type="submit" disabled={creating} className="px-4 py-2 bg-safelight rounded font-mono text-xs uppercase tracking-wide hover:bg-safelight-dim transition-colors disabled:opacity-60">{creating ? 'Creating…' : 'Create event'}</button>
         <input value={newEvent.location} onChange={(e) => setNewEvent((n) => ({ ...n, location: e.target.value }))} placeholder="Location" className="sm:col-span-2 bg-ink-soft border border-chrome rounded px-3 py-2 text-paper focus:outline-none focus:border-safelight" />
+        <label className="sm:col-span-4 font-mono text-xs text-ash">Attendee emails CSV (required)
+          <input required type="file" accept=".csv,text/csv" onChange={(e) => setAttendeeFile(e.target.files?.[0] ?? null)} className="block mt-2 w-full text-paper" />
+          <span className="block mt-1">Use an email_id column, one attendee per row. Up to 1 MB or 20,000 attendees.</span>
+        </label>
       </form>
 
       {error && <p className="text-sm text-safelight mb-6">{error}</p>}
@@ -169,9 +204,14 @@ export default function ManagerDashboard() {
                     <h3 className="font-display text-xl truncate">{event.name}</h3>
                     <p className="font-mono text-xs text-ash">{event.date || 'No date set'} &middot; {event.photoCount.toLocaleString()} photos</p>
                     {event.scannedCount != null && <p className="font-mono text-xs text-ash">{event.scannedCount.toLocaleString()} scanned &middot; {(event.faceCount ?? 0).toLocaleString()} faces found{event.scanFailureCount ? ` · ${event.scanFailureCount} scan failures` : ''}</p>}
+                    <p className="font-mono text-xs text-ash">{event.hasAttendeeList ? `${event.attendeeCount.toLocaleString()} attendees` : 'Attendee CSV needed'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <label className="px-3 py-1.5 border border-chrome rounded font-mono text-xs uppercase tracking-wide cursor-pointer hover:border-safelight transition-colors">
+                    {event.hasAttendeeList ? 'Replace attendee CSV' : 'Upload attendee CSV'}
+                    <input type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { replaceAttendees(event.id, e.target.files?.[0]); e.target.value = '' }} />
+                  </label>
                   <label className="px-3 py-1.5 border border-chrome rounded font-mono text-xs uppercase tracking-wide cursor-pointer hover:border-safelight transition-colors">
                     {uploadingId === event.id ? `Processing ${uploadProgress}` : 'Upload photos'}
                     <input type="file" multiple accept="image/*" className="hidden" disabled={uploadingId === event.id} onChange={(e) => handleUpload(event.id, e.target.files)} />
